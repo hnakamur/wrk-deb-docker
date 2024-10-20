@@ -1,0 +1,98 @@
+wrk (4.2.0-4hn1DebRelDistrib) UNRELEASED; urgency=medium
+
+  * Upstream version to 4.2.0
+
+ -- Hiroaki Nakamura <hnakamur@gmail.com>  Sun, 20 Oct 2024 18:53:47 +0900
+
+wrk (4.1.0-4build2) noble; urgency=medium
+
+  * No-change rebuild for CVE-2024-3094
+
+ -- William Grant <wgrant@ubuntu.com>  Mon, 01 Apr 2024 19:36:57 +1100
+
+wrk (4.1.0-4build1) noble; urgency=medium
+
+  * No-change rebuild against libssl3t64
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Tue, 05 Mar 2024 02:16:47 +0000
+
+wrk (4.1.0-4) unstable; urgency=medium
+
+  * Bump standards version to 4.6.2 (no changes necessary)
+  * Add man page (Closes: #1050831)
+
+ -- Stephen Gelman <ssgelm@debian.org>  Sun, 29 Oct 2023 18:12:19 -0500
+
+wrk (4.1.0-3) unstable; urgency=medium
+
+  * Use dh_auto_build when building to call the correct make command when cross compiling and don't hard-code the build architecture's pkg-config.
+    Thanks to Helmut Grohne (Closes: #961949)
+
+ -- Stephen Gelman <ssgelm@debian.org>  Sun, 31 May 2020 23:42:16 -0500
+
+wrk (4.1.0-2) unstable; urgency=medium
+
+  * Fix FTBFS on armel.
+    Thanks to Adrian Bunk (Closes: #960755)
+
+ -- Stephen Gelman <ssgelm@debian.org>  Sat, 16 May 2020 12:47:51 -0500
+
+wrk (4.1.0-1) unstable; urgency=medium
+
+  * New upstream release
+  * Update Makefile for Debian
+  * debian/docs: Update path to README
+
+ -- Stephen Gelman <ssgelm@debian.org>  Sat, 16 May 2020 02:44:59 -0500
+
+wrk (4.0.2-3) unstable; urgency=medium
+
+  * Change maintainer to Stephen Gelman
+  * Fix FTBFS with luajit 2.1.
+    Thanks to Rinat Ibragimov (Closes: #873321, #874176)
+  * debian/control: Update Vcs-* urls
+  * debian/control: Update dh compat level to 12 and standards version to 4.5.0
+  * Fix lintian warnings and errors
+
+ -- Stephen Gelman <ssgelm@debian.org>  Sat, 16 May 2020 01:48:55 -0500
+
+wrk (4.0.2-2) unstable; urgency=medium
+
+  [ Christos Trochalakis ]
+  * Modify previous mips FTBFS patch rendering wrk unusable in all
+    architectures. Thanks to Rinat Ibragimov (Closes: #855118)
+  * Fix build on mips architectures (Closes: #801881)
+
+ -- Robert Edmonds <edmonds@debian.org>  Sat, 05 Aug 2017 16:04:19 -0400
+
+wrk (4.0.2-1) unstable; urgency=medium
+
+  [ Robert Edmonds ]
+  * New upstream version 4.0.2
+  * .gitattributes: Ignore /deps
+  * debian/gbp.conf: Use repack/* for upstream-tag
+  * debian/rules: Build against system luajit, openssl
+  * debian/rules: Attempt to fix FTBFS on powerpc
+  * debian/rules: Set VER to Debian package version when calling make
+  * debian/gbp.conf: Add [dch] section
+  * debian/gbp.conf: Set debian-branch in [DEFAULT] section
+  * debian/control: Standards-Version 3.9.8 (no changes)
+  * debian/control: Secure Vcs-Git URI
+  * debian/copyright: Remove stanzas for deps/ files
+
+  [ Jurica Stanojkovic ]
+  * Fix FTBFS on mips, mipsel
+
+ -- Robert Edmonds <edmonds@debian.org>  Sun, 02 Oct 2016 20:16:03 -0400
+
+wrk (4.0.1-2) unstable; urgency=medium
+
+  * Fix overlinking.
+
+ -- Robert Edmonds <edmonds@debian.org>  Thu, 16 Apr 2015 20:48:23 -0400
+
+wrk (4.0.1-1) unstable; urgency=medium
+
+  * Initial release. (Closes: #782670)
+
+ -- Robert Edmonds <edmonds@debian.org>  Wed, 15 Apr 2015 17:54:34 -0400

@@ -1,0 +1,23 @@
+#!/usr/bin/make -f
+
+include /usr/share/dpkg/architecture.mk
+include /usr/share/dpkg/pkg-info.mk
+
+BINDIR=$(CURDIR)/debian/wrk/usr/bin
+
+ifneq (,$(filter $(DEB_HOST_ARCH), armel mips mipsel powerpc))
+	LIBS += -latomic
+	export LIBS
+endif
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+%:
+	dh $@
+
+override_dh_auto_build:
+	dh_auto_build -- WITH_LUAJIT=/usr WITH_OPENSSL=/usr VER=debian/$(DEB_VERSION)
+
+override_dh_installman:
+	help2man --no-info --name="a modern HTTP benchmarking tool" --version-string=$(DEB_VERSION_UPSTREAM) $(BINDIR)/wrk > debian/wrk.1
+	dh_installman

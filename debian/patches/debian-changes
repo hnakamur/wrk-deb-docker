@@ -1,0 +1,101 @@
+Subject: Collected Debian patches for wrk
+Author: Robert Edmonds <edmonds@debian.org>
+
+The wrk package is maintained in Git rather than maintaining
+patches as separate files, and separating the patches doesn't seem to
+be worth the effort.  They are therefore all included in this single
+Debian patch.
+
+For full commit history and separated commits, see the packaging Git
+repository.
+--- wrk-4.1.0.orig/Makefile
++++ wrk-4.1.0/Makefile
+@@ -1,5 +1,6 @@
++PKG_CONFIG ?= pkg-config
+ CFLAGS  += -std=c99 -Wall -O2 -D_REENTRANT
+-LIBS    := -lpthread -lm -lssl -lcrypto
++LIBS    += -lpthread -lm -lssl -lcrypto
+ 
+ TARGET  := $(shell uname -s | tr '[A-Z]' '[a-z]' 2>/dev/null || echo unknown)
+ 
+@@ -17,6 +18,11 @@ else ifeq ($(TARGET), freebsd)
+ 	LDFLAGS += -Wl,-E
+ endif
+ 
++CFLAGS   += $(shell $(PKG_CONFIG) --cflags luajit)
++LIBS     += $(shell $(PKG_CONFIG) --libs luajit)
++
++CFLAGS   += $(CPPFLAGS)
++
+ SRC  := wrk.c net.c ssl.c aprintf.c stats.c script.c units.c \
+ 		ae.c zmalloc.c http_parser.c
+ BIN  := wrk
+@@ -51,8 +57,7 @@ clean:
+ 	$(RM) -rf $(BIN) obj/*
+ 
+ $(BIN): $(OBJ)
+-	@echo LINK $(BIN)
+-	@$(CC) $(LDFLAGS) -o $@ $^ $(LIBS)
++	$(CC) $(LDFLAGS) -o $@ $^ $(LIBS)
+ 
+ $(OBJ): config.h Makefile $(DEPS) | $(ODIR)
+ 
+@@ -60,15 +65,13 @@ $(ODIR):
+ 	@mkdir -p $@
+ 
+ $(ODIR)/bytecode.o: src/wrk.lua
+-	@echo LUAJIT $<
+-	@$(SHELL) -c 'PATH=obj/bin:$(PATH) luajit -b $(CURDIR)/$< $(CURDIR)/$@'
++	$(SHELL) -c 'PATH=obj/bin:$(PATH) luajit -b $(CURDIR)/$< $(CURDIR)/$@'
+ 
+ $(ODIR)/version.o:
+ 	@echo 'const char *VERSION="$(VER)";' | $(CC) -xc -c -o $@ -
+ 
+ $(ODIR)/%.o : %.c
+-	@echo CC $<
+-	@$(CC) $(CFLAGS) -c -o $@ $<
++	$(CC) $(CFLAGS) -c -o $@ $<
+ 
+ # Dependencies
+ 
+--- wrk-4.1.0.orig/src/script.c
++++ wrk-4.1.0/src/script.c
+@@ -6,6 +6,10 @@
+ #include "http_parser.h"
+ #include "zmalloc.h"
+ 
++#ifndef luaL_reg
++#define luaL_reg luaL_Reg
++#endif
++
+ typedef struct {
+     char *name;
+     int   type;
+--- wrk-4.1.0.orig/src/stats.c
++++ wrk-4.1.0/src/stats.c
+@@ -21,12 +21,21 @@ void stats_free(stats *stats) {
+ 
+ int stats_record(stats *stats, uint64_t n) {
+     if (n >= stats->limit) return 0;
+-    __sync_fetch_and_add(&stats->data[n], 1);
+-    __sync_fetch_and_add(&stats->count, 1);
++    __atomic_fetch_add(&stats->data[n], 1, __ATOMIC_SEQ_CST);
++    __atomic_fetch_add(&stats->count, 1, __ATOMIC_SEQ_CST);
+     uint64_t min = stats->min;
+     uint64_t max = stats->max;
+-    while (n < min) min = __sync_val_compare_and_swap(&stats->min, min, n);
+-    while (n > max) max = __sync_val_compare_and_swap(&stats->max, max, n);
++    while (n < min) {
++        __atomic_compare_exchange(&stats->min, &min, &n, false,
++                                  __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
++        min = stats->min;
++    }
++    while (n > max) {
++        __atomic_compare_exchange(&stats->max, &max, &n, false,
++                                  __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
++        max = stats->max;
++    }
++
+     return 1;
+ }
+ 
