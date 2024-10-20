@@ -8,13 +8,19 @@ Debian patch.
 
 For full commit history and separated commits, see the packaging Git
 repository.
---- wrk-4.1.0.orig/Makefile
-+++ wrk-4.1.0/Makefile
+diff --git a/Makefile b/Makefile
+index 395b98a..ed603bf 100644
+diff --git a/src/script.c b/src/script.c
+index 68a5d08..8b4f1d5 100644
+diff --git a/src/stats.c b/src/stats.c
+index 92409ec..9d265bf 100644
+--- wrk-4.2.0.orig/Makefile
++++ wrk-4.2.0/Makefile
 @@ -1,5 +1,6 @@
 +PKG_CONFIG ?= pkg-config
  CFLAGS  += -std=c99 -Wall -O2 -D_REENTRANT
--LIBS    := -lpthread -lm -lssl -lcrypto
-+LIBS    += -lpthread -lm -lssl -lcrypto
+-LIBS    := -lm -lssl -lcrypto -lpthread
++LIBS    += -lm -lssl -lcrypto -lpthread
  
  TARGET  := $(shell uname -s | tr '[A-Z]' '[a-z]' 2>/dev/null || echo unknown)
  
@@ -43,9 +49,9 @@ repository.
 @@ -60,15 +65,13 @@ $(ODIR):
  	@mkdir -p $@
  
- $(ODIR)/bytecode.o: src/wrk.lua
+ $(ODIR)/bytecode.c: src/wrk.lua $(DEPS)
 -	@echo LUAJIT $<
--	@$(SHELL) -c 'PATH=obj/bin:$(PATH) luajit -b $(CURDIR)/$< $(CURDIR)/$@'
+-	@$(SHELL) -c 'PATH="obj/bin:$(PATH)" luajit -b "$(CURDIR)/$<" "$(CURDIR)/$@"'
 +	$(SHELL) -c 'PATH=obj/bin:$(PATH) luajit -b $(CURDIR)/$< $(CURDIR)/$@'
  
  $(ODIR)/version.o:
@@ -58,8 +64,8 @@ repository.
  
  # Dependencies
  
---- wrk-4.1.0.orig/src/script.c
-+++ wrk-4.1.0/src/script.c
+--- wrk-4.2.0.orig/src/script.c
++++ wrk-4.2.0/src/script.c
 @@ -6,6 +6,10 @@
  #include "http_parser.h"
  #include "zmalloc.h"
@@ -71,8 +77,8 @@ repository.
  typedef struct {
      char *name;
      int   type;
---- wrk-4.1.0.orig/src/stats.c
-+++ wrk-4.1.0/src/stats.c
+--- wrk-4.2.0.orig/src/stats.c
++++ wrk-4.2.0/src/stats.c
 @@ -21,12 +21,21 @@ void stats_free(stats *stats) {
  
  int stats_record(stats *stats, uint64_t n) {
